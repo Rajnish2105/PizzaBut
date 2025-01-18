@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Boxes, ClipboardList, Menu, X, LogOut } from "lucide-react";
+import { Pizza, History, Menu, X, LayoutDashboard, LogOut } from "lucide-react";
+import { toast } from "sonner";
 
 const BACKEND_API = import.meta.env.VITE_BACKEND_API || "http://localhost:3000";
 
-const AdminNav = () => {
+const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleLogout = async () => {
@@ -14,10 +15,13 @@ const AdminNav = () => {
         credentials: "include",
       });
       if (res.ok) {
+        const { message } = await res.json();
+        toast.success(message, { closeButton: true });
         window.location.href = "/auth?signin";
       }
     } catch (error) {
       console.error("Logout failed:", error);
+      toast.error("Couldn't log out at the moment!");
     }
   };
 
@@ -45,10 +49,10 @@ const AdminNav = () => {
         <ul className="space-y-4 w-full">
           <li>
             <Link
-              to="/admin/inventory"
+              to="/user/dashboard"
               className="flex items-center space-x-2 hover:bg-gray-700 p-2 rounded-xl transition-all duration-300 group"
             >
-              <Boxes
+              <LayoutDashboard
                 size={20}
                 className="group-hover:text-purple-400 transition-colors duration-300"
               />
@@ -57,16 +61,16 @@ const AdminNav = () => {
                   isOpen ? "block" : "hidden"
                 } group-hover:text-purple-400 transition-colors duration-300`}
               >
-                Manage Inventory
+                Dashboard
               </span>
             </Link>
           </li>
           <li>
             <Link
-              to="/admin/handleorders"
+              to="/user/custom-order"
               className="flex items-center space-x-2 hover:bg-gray-700 p-2 rounded-xl transition-all duration-300 group"
             >
-              <ClipboardList
+              <Pizza
                 size={20}
                 className="group-hover:text-purple-400 transition-colors duration-300"
               />
@@ -75,7 +79,25 @@ const AdminNav = () => {
                   isOpen ? "block" : "hidden"
                 } group-hover:text-purple-400 transition-colors duration-300`}
               >
-                Manage Orders
+                Order Custom Pizza
+              </span>
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/user/orderhistory"
+              className="flex items-center space-x-2 hover:bg-gray-700 p-2 rounded-xl transition-all duration-300 group"
+            >
+              <History
+                size={20}
+                className="group-hover:text-purple-400 transition-colors duration-300"
+              />
+              <span
+                className={`${
+                  isOpen ? "block" : "hidden"
+                } group-hover:text-purple-400 transition-colors duration-300`}
+              >
+                Order History
               </span>
             </Link>
           </li>
@@ -101,4 +123,4 @@ const AdminNav = () => {
   );
 };
 
-export default AdminNav;
+export default Navbar;

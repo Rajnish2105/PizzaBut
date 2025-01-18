@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { Mail } from "lucide-react";
 
+const BACKEND_API = import.meta.env.VITE_BACKEND_API || "http://localhost:3000";
+
 export default function ForgotPassword() {
   const [isSubmmitted, setIsSubmitted] = useState<boolean>(false);
   const [email, setEmail] = useState("");
@@ -10,30 +12,31 @@ export default function ForgotPassword() {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
-    console.log("email before", email);
+    // console.log("email before", email);
 
     try {
-      const res = await fetch("http://localhost:3000/verifyuser", {
+      const res = await fetch(`${BACKEND_API}/verifyuser`, {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-type": "application/json",
         },
         body: JSON.stringify({ email }),
       });
       if (!res.ok) {
-        toast.error("something went wrong!", { closeButton: true });
-        return;
+        const { error } = await res.json();
+        throw new Error(error);
       }
-      const { verified } = await res.json();
-
+      const { verified, message } = await res.json();
       if (verified) {
+        toast.success(message, { closeButton: true });
         setIsSubmitted(true);
       } else {
-        toast.error("No Such user exist");
+        throw new Error("not verified");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.log(err);
-      toast.error("Server down", { closeButton: true });
+      toast.error(err.message, { closeButton: true });
     }
   }
 

@@ -9,7 +9,7 @@ import SignupPage from "./pages/auth/SignupPage.tsx";
 import DashboardPage from "./pages/user/DashboardPage.tsx";
 import MainLayout from "./pages/user/MainLayout.tsx";
 import OrderCustomPizza from "./pages/user/OrderCustomPizzaPage.tsx";
-import OrderHistory, { getAllOrders } from "./pages/user/OrderHistoryPage.tsx";
+import OrderHistory from "./pages/user/OrderHistoryPage.tsx";
 import VerifyOtp from "./pages/VerifyOtp.tsx";
 import ForgotPassword from "./pages/ForgotPassword.tsx";
 import MiniInvintory, {
@@ -18,12 +18,16 @@ import MiniInvintory, {
 import { CustomPizzaLoader } from "./Components/custom order/OrderCustomPizza.tsx";
 import AdminOrdersPage from "./pages/admin/AdminOrdersPage.tsx"; // Removed adminOrdersLoader import
 import AdminLayout from "./pages/admin/AdminLayout.tsx"; // Added AdminLayout import
+import LandingPage from "./pages/LandingPage.tsx";
+
+const BACKEND_API = import.meta.env.VITE_BACKEND_API || "http://localhost:3000";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <Layout />,
     children: [
+      { path: "/", loader: MiddleWare, element: <LandingPage /> },
       {
         path: "/auth",
         element: <SignupPage />,
@@ -36,7 +40,6 @@ const router = createBrowserRouter([
         element: <MainLayout />,
         loader: MiddleWare, // Move middleware here to protect all user routes
         children: [
-          { path: "/", element: <DashboardPage /> }, // Add default route
           { path: "user/dashboard", element: <DashboardPage /> },
           {
             path: "user/custom-order",
@@ -45,7 +48,6 @@ const router = createBrowserRouter([
           },
           {
             path: "user/orderhistory",
-            loader: getAllOrders,
             element: <OrderHistory />,
           },
         ],
@@ -77,35 +79,31 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
 
 // Separate loader for auth route
 async function authLoader() {
-  const response = await fetch("http://localhost:3000/protected", {
-    method: "GET",
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-  const data = await response.json();
-  if (data.isAuthenticated) {
-    throw redirect("/");
+  try {
+    const response = await fetch(`${BACKEND_API}/protected`, {
+      credentials: "include",
+    });
+    const data = await response.json();
+
+    if (data.isAuthenticated) {
+      throw redirect("/user/dashboard");
+    }
+
+    return null;
+  } catch (error) {
+    console.log("You are logged in!");
+    throw redirect("/user/dashboard");
   }
-  return null;
 }
 
 async function MiddleWare() {
-  // Don't check auth for auth route
   if (window.location.pathname === "/auth") {
     return null;
   }
-
   try {
-    const response = await fetch("http://localhost:3000/protected", {
-      method: "GET",
+    const response = await fetch(`${BACKEND_API}/protected`, {
       credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
     });
-
     const data = await response.json();
 
     if (!data.isAuthenticated) {

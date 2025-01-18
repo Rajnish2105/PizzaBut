@@ -3,12 +3,10 @@ import AdminNav from "./AdminNav";
 
 export default function AdminLayout() {
   return (
-    <div className="flex min-h-screen bg-gray-100">
+    <div className="flex min-h-screen">
       <AdminNav />
-      <main className="flex-1 ml-16">  {/* ml-16 matches the closed nav width */}
-        <div className="container mx-auto p-4">
-          <Outlet />
-        </div>
+      <main className={`flex-1 ml-16 overflow-y-auto bg-gray-50`}>
+        <Outlet />
       </main>
     </div>
   );

@@ -1,5 +1,9 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { ChevronRight, Loader2 } from "lucide-react";
+
+const BACKEND_API = import.meta.env.VITE_BACKEND_API || "http://localhost:3000";
 
 interface OrderItem {
   base: {
@@ -22,7 +26,9 @@ interface OrderItem {
 
 interface Order {
   _id: string;
-  userId: string;
+  userId: {
+    name: string;
+  };
   items: OrderItem;
   totalPrice: number;
   status: string;
@@ -33,40 +39,50 @@ const ORDER_STATUSES = [
   {
     value: "preparing",
     label: "Preparing",
-    color: "bg-yellow-100 text-yellow-800",
+    color: "bg-yellow-900 text-yellow-200",
+    hoverColor: "hover:bg-yellow-800",
   },
   {
     value: "on-the-way",
     label: "On the Way",
-    color: "bg-blue-100 text-blue-800",
+    color: "bg-blue-900 text-blue-200",
+    hoverColor: "hover:bg-blue-800",
   },
   {
     value: "delivered",
     label: "Delivered",
-    color: "bg-green-100 text-green-800",
+    color: "bg-green-900 text-green-200",
+    hoverColor: "hover:bg-green-800",
   },
 ];
 
 const AdminOrders = () => {
+  const navigate = useNavigate();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchOrders = async () => {
     try {
-      const res = await fetch("http://localhost:3000/getEveryOrder", {
+      const res = await fetch(`${BACKEND_API}/getEveryOrder`, {
         credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
       });
 
-      if (!res.ok) throw new Error("Failed to fetch orders");
-
+      if (!res.ok) {
+        const { error, isAdmin } = await res.json();
+        // console.log("isadmin", isAdmin, error);
+        if (!isAdmin) {
+          return navigate("/user/dashboard");
+        }
+        throw new Error(error);
+      }
       const data = await res.json();
-      setOrders(data.orders || []);
+      setOrders(data.orders);
     } catch (error) {
       console.error("Error fetching orders:", error);
-      toast.error("Failed to load orders");
+      toast.error(error instanceof Error ? error.message : "Server error!");
     } finally {
       setLoading(false);
     }
@@ -78,7 +94,7 @@ const AdminOrders = () => {
 
   const handleStatusUpdate = async (orderId: string, newStatus: string) => {
     try {
-      const res = await fetch("http://localhost:3000/updateOrder", {
+      const res = await fetch(`${BACKEND_API}/updateOrder`, {
         method: "POST",
         credentials: "include",
         headers: {
@@ -101,18 +117,16 @@ const AdminOrders = () => {
 
   if (loading) {
     return (
-      <div className="text-center py-10">
-        <h2 className="text-2xl font-semibold text-gray-600">
-          Loading orders...
-        </h2>
+      <div className="flex items-center justify-center h-screen bg-gray-900">
+        <Loader2 className="w-8 h-8 text-purple-500 animate-spin" />
       </div>
     );
   }
 
   if (!orders || orders.length === 0) {
     return (
-      <div className="text-center py-10">
-        <h2 className="text-2xl font-semibold text-gray-600">
+      <div className="flex items-center justify-center w-full h-screen bg-gray-900">
+        <h2 className="text-3xl font-semibold text-gray-400">
           No orders found
         </h2>
       </div>
@@ -120,83 +134,100 @@ const AdminOrders = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">All Orders</h1>
-      <div className="space-y-6">
-        {orders.map((order) => (
-          <div
-            key={order._id}
-            className="bg-white rounded-lg shadow-md p-6 border border-gray-200"
-          >
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <h3 className="text-lg font-semibold">Order ID: {order._id}</h3>
-                <p className="text-gray-600">
-                  Date: {new Date(order.createdAt).toLocaleDateString()}
+    <div className="min-h-screen bg-gray-900 px-4 py-8">
+      <div className="max-w-7xl mx-auto">
+        <h1 className="text-4xl font-bold mb-8 bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+          All Orders
+        </h1>
+        <div className="space-y-6">
+          {orders.map((order) => (
+            <div
+              key={order._id}
+              className="bg-gray-800 rounded-2xl shadow-2xl p-6 border border-gray-700 hover:shadow-purple-500/20 transition-all duration-300 group"
+            >
+              <div className="flex flex-col md:flex-row justify-between items-start mb-4">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-200 mb-2">
+                    Order ID: <span className="text-gray-200">{order._id}</span>
+                  </h3>
+                  <p className="text-gray-400">
+                    Date: {new Date(order.createdAt).toLocaleDateString()}
+                  </p>
+                  <p className="text-gray-400 italic">
+                    User: {order.userId.name}
+                  </p>
+                </div>
+                <span
+                  className={`px-3 py-1 rounded-full text-sm font-medium mt-2 md:mt-0
+                  ${
+                    order.status === "preparing"
+                      ? "bg-yellow-900 text-yellow-200"
+                      : order.status === "on-the-way"
+                      ? "bg-blue-900 text-blue-200"
+                      : order.status === "delivered"
+                      ? "bg-green-900 text-green-200"
+                      : "bg-gray-700 text-gray-200"
+                  }`}
+                >
+                  {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                </span>
+              </div>
+
+              <div className="space-y-2 text-gray-300">
+                <p>
+                  <strong className="text-purple-400">Base:</strong>{" "}
+                  {order.items.base.name}
                 </p>
-                <p className="text-gray-600">User ID: {order.userId}</p>
+                <p>
+                  <strong className="text-purple-400">Sauce:</strong>{" "}
+                  {order.items.sauce.name}
+                </p>
+                <p>
+                  <strong className="text-purple-400">Cheese:</strong>{" "}
+                  {order.items.cheese.name}
+                </p>
+                <p>
+                  <strong className="text-purple-400">Veggies:</strong>{" "}
+                  {order.items.veggies.map((v) => v.name).join(", ")}
+                </p>
               </div>
-              <span
-                className={`px-3 py-1 rounded-full text-sm font-medium
-                ${
-                  order.status === "preparing"
-                    ? "bg-yellow-100 text-yellow-800"
-                    : order.status === "on-the-way"
-                    ? "bg-blue-100 text-blue-800"
-                    : order.status === "delivered"
-                    ? "bg-green-100 text-green-800"
-                    : "bg-gray-100 text-gray-800"
-                }`}
-              >
-                {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-              </span>
-            </div>
 
-            <div className="space-y-2">
-              <p>
-                <strong>Base:</strong> {order.items.base.name}
-              </p>
-              <p>
-                <strong>Sauce:</strong> {order.items.sauce.name}
-              </p>
-              <p>
-                <strong>Cheese:</strong> {order.items.cheese.name}
-              </p>
-              <p>
-                <strong>Veggies:</strong>{" "}
-                {order.items.veggies.map((v) => v.name).join(", ")}
-              </p>
-            </div>
+              <div className="mt-4 text-right">
+                <p className="text-lg font-semibold text-purple-400">
+                  Total: ₹{order.totalPrice.toFixed(2)}
+                </p>
+              </div>
 
-            <div className="mt-4 text-right">
-              <p className="text-lg font-semibold">
-                Total: ₹{order.totalPrice.toFixed(2)}
-              </p>
-            </div>
-
-            {/* Admin-specific status update buttons */}
-            <div className="mt-4 pt-4 border-t border-gray-200">
-              <p className="text-sm text-gray-600 mb-2">Update Order Status:</p>
-              <div className="flex gap-2">
-                {ORDER_STATUSES.map((status) => (
-                  <button
-                    key={status.value}
-                    onClick={() => handleStatusUpdate(order._id, status.value)}
-                    disabled={order.status === status.value}
-                    className={`px-3 py-1 rounded-full text-sm font-medium transition-colors
-                      ${
-                        order.status === status.value
-                          ? status.color
-                          : "bg-gray-100 hover:bg-gray-200"
-                      }`}
-                  >
-                    {status.label}
-                  </button>
-                ))}
+              <div className="mt-6 pt-4 border-t border-gray-700">
+                <p className="text-sm text-gray-400 mb-2">
+                  Update Order Status:
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {ORDER_STATUSES.map((status) => (
+                    <button
+                      key={status.value}
+                      onClick={() =>
+                        handleStatusUpdate(order._id, status.value)
+                      }
+                      disabled={order.status === status.value}
+                      className={`px-3 py-1 rounded-full text-sm font-medium transition-all duration-200 flex items-center
+          ${
+            order.status === status.value
+              ? status.color
+              : `bg-gray-700 text-gray-300 ${status.hoverColor}`
+          }`}
+                    >
+                      {status.label}
+                      {order.status !== status.value && (
+                        <ChevronRight className="w-4 h-4 ml-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                      )}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );

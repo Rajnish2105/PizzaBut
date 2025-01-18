@@ -1,7 +1,7 @@
 import React from "react";
 
 interface PizzaItemProps {
-  _id: string;  // Changed from number to string
+  _id: string; // Changed from number to string
   name: string;
   price: number;
   image: string;
@@ -11,7 +11,7 @@ interface PizzaItemProps {
 }
 
 const PizzaItem: React.FC<PizzaItemProps> = ({
-  _id,  // Changed from id to _id
+  _id, // Changed from id to _id
   name,
   price,
   image,
@@ -24,26 +24,28 @@ const PizzaItem: React.FC<PizzaItemProps> = ({
       <input
         type={type}
         name={`pizza-item-${type}`}
-        value={_id}  // Changed from id to _id
+        value={_id}
         checked={isSelected}
         onChange={onSelect}
         className="sr-only"
       />
-      <div className={`relative p-2 ${isSelected ? "scale-110" : ""}`}>
+      <div className={`relative p-2 ${isSelected ? "scale-105" : ""}`}>
         <img
-          src={image}
+          src={image || "/placeholder.svg"}
           alt={name}
           className="transition-all duration-300 ease-in-out
-          drop-shadow-[0_10px_10px_rgba(0,0,0,0.25)]
-          hover:drop-shadow-[0_15px_15px_rgba(0,0,0,0.35)]
-          hover:scale-110 w-32 h-32 object-contain"
+          drop-shadow-[0_0px_5px_rgba(168,85,247,0.2)]
+          hover:drop-shadow-[0_10px_25px_rgba(168,85,247,0.6)]
+          hover:scale-110 w-28 h-28 object-contain"
         />
         {isSelected && (
-          <div className="absolute inset-0 border-4 border-red-500 rounded-full"></div>
+          <div className="absolute inset-0 border-2 border-purple-500 rounded-full"></div>
         )}
       </div>
-      <span className="mt-3 text-center font-medium text-gray-700">{name}</span>
-      <span className="text-sm text-gray-600">₹{price.toFixed(2)}</span>
+      <span className="mt-2 text-center font-medium text-gray-300 text-sm">
+        {name}
+      </span>
+      <span className="text-xs text-gray-400">₹{price.toFixed(2)}</span>
     </label>
   );
 };

@@ -11,6 +11,8 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
+const BACKEND_API = import.meta.env.VITE_BACKEND_API || "http://localhost:3000";
+
 export default function Signup({ isSignup }: { isSignup: boolean }) {
   const navigate = useNavigate();
   const [userInfo, setUserInfo] = useState<{
@@ -33,9 +35,21 @@ export default function Signup({ isSignup }: { isSignup: boolean }) {
     e.preventDefault();
     setIsLoading(true);
 
+    if (isSignup && userInfo.name.length < 3) {
+      toast.error("please fill your correct name!");
+      setIsLoading(false);
+      return;
+    }
+
+    if (isSignup && userInfo.password.length < 8) {
+      toast.error("Password must be 8 characters or long");
+      setIsLoading(false);
+      return;
+    }
+
     try {
       if (isSignup) {
-        const otpres = await fetch("http://localhost:3000/createotp", {
+        const otpres = await fetch(`${BACKEND_API}/createotp`, {
           method: "POST",
           headers: {
             "Content-type": "application/json",
@@ -43,11 +57,12 @@ export default function Signup({ isSignup }: { isSignup: boolean }) {
           body: JSON.stringify({ email: userInfo.email }),
         });
 
-        const { message, otp, error } = await otpres.json();
-        if (error) {
-          toast.error(error, { closeButton: true });
-          return;
+        if (!otpres.ok) {
+          const { error } = await otpres.json();
+          throw new Error(error);
         }
+
+        const { message, otp } = await otpres.json();
         toast.success(message, { closeButton: true });
 
         return navigate("/verifyotp", {
@@ -61,7 +76,7 @@ export default function Signup({ isSignup }: { isSignup: boolean }) {
         });
       }
 
-      const res = await fetch(`http://localhost:3000/signin`, {
+      const res = await fetch(`${BACKEND_API}/signin`, {
         method: "POST",
         credentials: "include",
         headers: {
@@ -73,12 +88,12 @@ export default function Signup({ isSignup }: { isSignup: boolean }) {
         }),
       });
 
-      const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.message || "Something went wrong");
+        const { error } = await res.json();
+        throw new Error(error);
       }
-
-      toast.success(data.message);
+      const data = await res.json();
+      toast.success(data.message, { closeButton: true });
       setUserInfo({ name: "", email: "", password: "" });
       setRole("");
 
@@ -88,7 +103,9 @@ export default function Signup({ isSignup }: { isSignup: boolean }) {
         navigate("/user/dashboard", { replace: true });
       }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "An error occurred");
+      console.log(error);
+      toast.error(error instanceof Error ? error.message : "Internet Error!");
+      return;
     } finally {
       setIsLoading(false);
     }

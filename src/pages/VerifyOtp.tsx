@@ -1,7 +1,9 @@
-import { useLocation, useNavigate } from "react-router-dom"; // Add useNavigate
+import { useLocation, useNavigate } from "react-router-dom";
 import { useState, useRef } from "react";
 import { ArrowRight, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
+
+const BACKEND_API = import.meta.env.VITE_BACKEND_API || "http://localhost:3000";
 
 export default function VerifyOtp() {
   const location = useLocation();
@@ -43,7 +45,7 @@ export default function VerifyOtp() {
     try {
       if (otp.join("") === user.otp) {
         // Fix comparison
-        const res = await fetch(`http://localhost:3000/signup`, {
+        const res = await fetch(`${BACKEND_API}/signup`, {
           method: "POST",
           credentials: "include",
           headers: {
@@ -59,10 +61,10 @@ export default function VerifyOtp() {
 
         const data = await res.json();
         if (!res.ok) {
-          throw new Error(data.message || "Something went wrong");
+          throw new Error(data.error || "Server Error!");
         }
 
-        toast.success("Account verified successfully!");
+        toast.success(data.message, { closeButton: true });
 
         // Better role-based navigation
         if (data.user && data.user.role) {

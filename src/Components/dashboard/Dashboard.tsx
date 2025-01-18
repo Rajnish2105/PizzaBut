@@ -3,6 +3,9 @@ import PizzaCard from "./PizzaCard";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 
+const BACKEND_API = import.meta.env.VITE_BACKEND_API || "http://localhost:3000";
+const RAZORPAY_KEY = import.meta.env.VITE_RAZORPAY_KEY;
+
 interface PizzaIngredients {
   base: { _id: string; name: string; price: number };
   sauce: { _id: string; name: string; price: number };
@@ -119,12 +122,23 @@ const Dashboard = () => {
   const [userInfo, setUserInfo] = useState({ name: "", email: "" });
   useEffect(() => {
     async function get() {
-      const res = await fetch("http://localhost:3000/whoami");
-      const { useremail, username } = await res.json();
-      if (!useremail || !username) {
+      try {
+        const res = await fetch(`${BACKEND_API}/whoami`, {
+          credentials: "include",
+        });
+        if (!res.ok) {
+          const { error } = await res.json();
+          throw new Error(error);
+        }
+        const { user } = await res.json();
+        if (!user.email || !user.name) {
+          throw new Error("No user");
+        }
+        setUserInfo({ name: user.name, email: user.email });
+      } catch (err: any) {
+        toast.error(err.message);
         return;
       }
-      setUserInfo({ name: username, email: useremail });
     }
     get();
   }, []);
@@ -152,34 +166,34 @@ const Dashboard = () => {
     if (pizza) {
       try {
         // Step 1: Create payment order
-        const orderResponse = await fetch(
-          "http://localhost:3000/create-payment",
-          {
-            method: "POST",
-            credentials: "include",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ amount: pizza.price }),
-          }
-        );
+        const orderResponse = await fetch(`${BACKEND_API}/create-payment`, {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ amount: pizza.price }),
+        });
 
-        if (!orderResponse.ok) throw new Error("Failed to create order");
-        const orderData = await orderResponse.json();
+        if (!orderResponse.ok) {
+          const { error } = await orderResponse.json();
+          throw new Error(error);
+        }
+        const { data } = await orderResponse.json();
 
         // Step 2: Initialize Razorpay
         const options = {
-          key: "rzp_test_tetpmUe834pauw", // Your Razorpay key
-          amount: orderData.amount,
-          currency: orderData.currency,
+          key: RAZORPAY_KEY, // Your Razorpay key
+          amount: data.amount,
+          currency: data.currency,
           name: "PizzaBut",
           description: `Order for ${pizza.name}`,
-          order_id: orderData.orderId,
+          order_id: data.orderId,
           handler: async function (response: any) {
             try {
               // Step 3: Verify payment
               const verifyResponse = await fetch(
-                "http://localhost:3000/verify-payment",
+                `${BACKEND_API}/verify-payment`,
                 {
                   method: "POST",
                   credentials: "include",
@@ -194,32 +208,32 @@ const Dashboard = () => {
                 }
               );
 
-              if (!verifyResponse.ok)
-                throw new Error("Payment verification failed");
-              const verifyData = await verifyResponse.json();
+              if (!verifyResponse.ok) {
+                const { error } = await verifyResponse.json();
+                throw new Error(error);
+              }
+              const { data } = await verifyResponse.json();
 
               // Step 4: Create final order
-              const finalOrderResponse = await fetch(
-                "http://localhost:3000/order",
-                {
-                  method: "POST",
-                  credentials: "include",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({
-                    items: pizza.ingredients,
-                    totalPrice: pizza.price,
-                    orderId: verifyData.orderId,
-                    paymentId: verifyData.paymentId,
-                  }),
-                }
-              );
+              const finalOrderResponse = await fetch(`${BACKEND_API}/order`, {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  items: pizza.ingredients,
+                  totalPrice: pizza.price,
+                  orderId: data.orderId,
+                  paymentId: data.paymentId,
+                }),
+              });
 
-              if (!finalOrderResponse.ok)
-                throw new Error("Failed to create order");
               const finalOrderData = await finalOrderResponse.json();
-              toast.success("Order placed successfully!");
+              if (finalOrderData.error) {
+                throw new Error(finalOrderData.error);
+              }
+              toast.success(finalOrderData.message);
               navigate("/user/orderhistory", { replace: true });
             } catch (error) {
               toast.error("Failed to process payment");
@@ -245,12 +259,12 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-full mx-auto">
-        <h1 className="text-4xl font-bold text-center mb-8 text-gray-800">
-          PizzaBut
+    <div className="min-h-screen bg-gray-900 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        <h1 className="text-5xl font-bold text-center mb-12 bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+          PIZZABUT
         </h1>
-        <div className="space-y-8">
+        <div className="space-y-12">
           {pizzaVarieties.map((pizza) => (
             <PizzaCard key={pizza.id} pizza={pizza} onOrder={handleOrder} />
           ))}

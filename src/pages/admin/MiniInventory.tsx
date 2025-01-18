@@ -1,6 +1,9 @@
-import { useLoaderData } from "react-router-dom";
+import { redirect, useLoaderData } from "react-router-dom";
 import { toast } from "sonner";
 import IngredientManager from "./IngridentManager";
+import type { LoaderFunction } from "react-router-dom";
+
+const BACKEND_API = import.meta.env.VITE_BACKEND_API || "http://localhost:3000";
 
 interface InventoryItem {
   _id: string;
@@ -25,30 +28,51 @@ export default function MiniInventory() {
   const cheeses = data.filter((item) => item.type === "cheese");
   const veggies = data.filter((item) => item.type === "veggie");
 
+  if (!data) {
+    return (
+      <div className="flex items-center justify-center w-full h-screen bg-gray-900">
+        <h2 className="text-3xl font-semibold text-gray-400">Store is Empty</h2>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gray-100">
-      <IngredientManager
-        bases={bases}
-        sauces={sauces}
-        cheeses={cheeses}
-        veggies={veggies}
-      />
+    <div className="w-full min-h-screen bg-gray-900">
+      <div className="w-full max-w-full mx-auto px-6 py-6">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+            Mini Inventory
+          </h1>
+        </div>
+        <IngredientManager
+          bases={bases}
+          sauces={sauces}
+          cheeses={cheeses}
+          veggies={veggies}
+        />
+      </div>
     </div>
   );
 }
 
-export async function InventoryLoader() {
+export const InventoryLoader: LoaderFunction = async () => {
   try {
-    const res = await fetch("http://localhost:3000/getStore", {
-      credentials: "include", // Add this to send cookies
+    const res = await fetch(`${BACKEND_API}/getStore`, {
+      credentials: "include",
     });
     if (!res.ok) {
-      throw new Error("Failed to fetch inventory");
+      const { error } = await res.json();
+      throw new Error(error);
     }
-    return await res.json();
+    const { data, isAdmin } = await res.json();
+    if (!isAdmin) {
+      return redirect("/user/dashboard");
+    }
+
+    return { data };
   } catch (err) {
     console.error(err);
     toast.error("Failed to load inventory data", { closeButton: true });
-    return { data: [] }; // Return empty data structure on error
+    return null; // Return empty data structure on error
   }
-}
+};
