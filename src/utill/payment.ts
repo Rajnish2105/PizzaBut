@@ -1,5 +1,5 @@
 const BACKEND_API = import.meta.env.VITE_BACKEND_API || "http://localhost:3000";
-const RAZORPAY_KEY = import.meta.env.VITE_RAZORPAY_KEY;
+const RAZORPAY_KEY = import.meta.env.VITE_RAZORPAY_ID;
 
 interface PaymentHandlerOptions {
   amount: number;

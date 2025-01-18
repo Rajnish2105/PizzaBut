@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 
 const BACKEND_API = import.meta.env.VITE_BACKEND_API || "http://localhost:3000";
-const RAZORPAY_KEY = import.meta.env.VITE_RAZORPAY_KEY;
+const RAZORPAY_KEY = import.meta.env.VITE_RAZORPAY_ID;
 
 interface PizzaIngredients {
   base: { _id: string; name: string; price: number };
