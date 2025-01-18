@@ -4,8 +4,6 @@ import { useLoaderData, useNavigate } from "react-router-dom";
 import { handlePayment } from "../../utill/payment";
 import PizzaSection from "./PizzaSection";
 
-const BACKEND_API = import.meta.env.VITE_BACKEND_API || "http://localhost:3000";
-
 interface InventoryItem {
   _id: string;
   name: string;
@@ -44,9 +42,12 @@ const OrderCustomPizza: React.FC = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await fetch(`${BACKEND_API}/whoami`, {
-          credentials: "include",
-        });
+        const response = await fetch(
+          "https://pizzabut-be.rajnishchahar.tech/whoami",
+          {
+            credentials: "include",
+          }
+        );
 
         if (!response.ok) {
           const { error } = await response.json();
@@ -109,26 +110,29 @@ const OrderCustomPizza: React.FC = () => {
             : undefined,
         onSuccess: async (paymentResponse) => {
           try {
-            const response = await fetch(`${BACKEND_API}/order`, {
-              method: "POST",
-              credentials: "include",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                items: {
-                  base: bases.find((b) => b._id === selectedBase),
-                  sauce: sauces.find((s) => s._id === selectedSauce),
-                  cheese: cheeses.find((c) => c._id === selectedCheese),
-                  veggies: veggies.filter((v) =>
-                    selectedVeggies.includes(v._id)
-                  ),
+            const response = await fetch(
+              "https://pizzabut-be.rajnishchahar.tech/order",
+              {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                  "Content-Type": "application/json",
                 },
-                totalPrice: calculateTotalPrice(),
-                orderId: paymentResponse.razorpay_order_id,
-                paymentId: paymentResponse.razorpay_payment_id,
-              }),
-            });
+                body: JSON.stringify({
+                  items: {
+                    base: bases.find((b) => b._id === selectedBase),
+                    sauce: sauces.find((s) => s._id === selectedSauce),
+                    cheese: cheeses.find((c) => c._id === selectedCheese),
+                    veggies: veggies.filter((v) =>
+                      selectedVeggies.includes(v._id)
+                    ),
+                  },
+                  totalPrice: calculateTotalPrice(),
+                  orderId: paymentResponse.razorpay_order_id,
+                  paymentId: paymentResponse.razorpay_payment_id,
+                }),
+              }
+            );
 
             if (!response.ok) {
               const { error } = await response.json();
@@ -211,7 +215,7 @@ const OrderCustomPizza: React.FC = () => {
 // Add loader function
 export async function CustomPizzaLoader() {
   try {
-    const res = await fetch(`${BACKEND_API}/getStore`, {
+    const res = await fetch("https://pizzabut-be.rajnishchahar.tech/getStore", {
       credentials: "include",
     });
     if (!res.ok) {

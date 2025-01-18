@@ -2,8 +2,6 @@
 
 // import { toast } from "sonner";
 
-// const BACKEND_API = import.meta.env.VITE_BACKEND_API || "http://localhost:3000";
-
 // interface PaymentHandlerParams {
 //   amount: number;
 //   onSuccess?: (response: any) => void;
@@ -16,7 +14,7 @@
 //   onError,
 // }: PaymentHandlerParams) {
 //   try {
-//     const orderResponse = await fetch(`${BACKEND_API}/create-payment`, {
+//     const orderResponse = await fetch('https://pizzabut-be.rajnishchahar.tech/create-payment', {
 //       method: "POST",
 //       credentials: "include",
 //       headers: {
@@ -47,7 +45,7 @@
 //           handler: async function (response: any) {
 //             try {
 //               const verifyResponse = await fetch(
-//                 `${BACKEND_API}/verify-payment`,
+//                 'https://pizzabut-be.rajnishchahar.tech/verify-payment',
 //                 {
 //                   method: "POST",
 //                   credentials: "include",

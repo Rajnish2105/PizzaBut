@@ -3,7 +3,6 @@ import PizzaCard from "./PizzaCard";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 
-const BACKEND_API = import.meta.env.VITE_BACKEND_API || "http://localhost:3000";
 const RAZORPAY_KEY = import.meta.env.VITE_RAZORPAY_ID;
 
 interface PizzaIngredients {
@@ -123,9 +122,12 @@ const Dashboard = () => {
   useEffect(() => {
     async function get() {
       try {
-        const res = await fetch(`${BACKEND_API}/whoami`, {
-          credentials: "include",
-        });
+        const res = await fetch(
+          "https://pizzabut-be.rajnishchahar.tech/whoami",
+          {
+            credentials: "include",
+          }
+        );
         if (!res.ok) {
           const { error } = await res.json();
           throw new Error(error);
@@ -166,14 +168,17 @@ const Dashboard = () => {
     if (pizza) {
       try {
         // Step 1: Create payment order
-        const orderResponse = await fetch(`${BACKEND_API}/create-payment`, {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ amount: pizza.price }),
-        });
+        const orderResponse = await fetch(
+          "https://pizzabut-be.rajnishchahar.tech/create-payment",
+          {
+            method: "POST",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ amount: pizza.price }),
+          }
+        );
 
         if (!orderResponse.ok) {
           const { error } = await orderResponse.json();
@@ -193,7 +198,7 @@ const Dashboard = () => {
             try {
               // Step 3: Verify payment
               const verifyResponse = await fetch(
-                `${BACKEND_API}/verify-payment`,
+                "https://pizzabut-be.rajnishchahar.tech/verify-payment",
                 {
                   method: "POST",
                   credentials: "include",
@@ -215,19 +220,22 @@ const Dashboard = () => {
               const { data } = await verifyResponse.json();
 
               // Step 4: Create final order
-              const finalOrderResponse = await fetch(`${BACKEND_API}/order`, {
-                method: "POST",
-                credentials: "include",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  items: pizza.ingredients,
-                  totalPrice: pizza.price,
-                  orderId: data.orderId,
-                  paymentId: data.paymentId,
-                }),
-              });
+              const finalOrderResponse = await fetch(
+                "https://pizzabut-be.rajnishchahar.tech/order",
+                {
+                  method: "POST",
+                  credentials: "include",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                    items: pizza.ingredients,
+                    totalPrice: pizza.price,
+                    orderId: data.orderId,
+                    paymentId: data.paymentId,
+                  }),
+                }
+              );
 
               const finalOrderData = await finalOrderResponse.json();
               if (finalOrderData.error) {

@@ -3,14 +3,12 @@ import { Link } from "react-router-dom";
 import { Pizza, History, Menu, X, LayoutDashboard, LogOut } from "lucide-react";
 import { toast } from "sonner";
 
-const BACKEND_API = import.meta.env.VITE_BACKEND_API || "http://localhost:3000";
-
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleLogout = async () => {
     try {
-      const res = await fetch(`${BACKEND_API}/logout`, {
+      const res = await fetch("https://pizzabut-be.rajnishchahar.tech/logout", {
         method: "GET",
         credentials: "include",
       });

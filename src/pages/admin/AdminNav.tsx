@@ -2,14 +2,12 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Boxes, ClipboardList, Menu, X, LogOut } from "lucide-react";
 
-const BACKEND_API = import.meta.env.VITE_BACKEND_API || "http://localhost:3000";
-
 const AdminNav = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleLogout = async () => {
     try {
-      const res = await fetch(`${BACKEND_API}/logout`, {
+      const res = await fetch("https://pizzabut-be.rajnishchahar.tech/logout", {
         method: "GET",
         credentials: "include",
       });

@@ -3,8 +3,6 @@ import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { Mail } from "lucide-react";
 
-const BACKEND_API = import.meta.env.VITE_BACKEND_API || "http://localhost:3000";
-
 export default function ForgotPassword() {
   const [isSubmmitted, setIsSubmitted] = useState<boolean>(false);
   const [email, setEmail] = useState("");
@@ -15,14 +13,17 @@ export default function ForgotPassword() {
     // console.log("email before", email);
 
     try {
-      const res = await fetch(`${BACKEND_API}/verifyuser`, {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-type": "application/json",
-        },
-        body: JSON.stringify({ email }),
-      });
+      const res = await fetch(
+        "https://pizzabut-be.rajnishchahar.tech/verifyuser",
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-type": "application/json",
+          },
+          body: JSON.stringify({ email }),
+        }
+      );
       if (!res.ok) {
         const { error } = await res.json();
         throw new Error(error);

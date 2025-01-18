@@ -20,8 +20,6 @@ import AdminOrdersPage from "./pages/admin/AdminOrdersPage.tsx"; // Removed admi
 import AdminLayout from "./pages/admin/AdminLayout.tsx"; // Added AdminLayout import
 import LandingPage from "./pages/LandingPage.tsx";
 
-const BACKEND_API = import.meta.env.VITE_BACKEND_API || "http://localhost:3000";
-
 const router = createBrowserRouter([
   {
     path: "/",
@@ -80,13 +78,17 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
 // Separate loader for auth route
 async function authLoader() {
   try {
-    const response = await fetch(`${BACKEND_API}/protected`, {
-      credentials: "include",
-    });
+    const response = await fetch(
+      "https://pizzabut-be.rajnishchahar.tech/protected",
+      {
+        credentials: "include",
+      }
+    );
+
     const data = await response.json();
 
     if (data.isAuthenticated) {
-      throw redirect("/user/dashboard");
+      throw new Error("You are logged in already!");
     }
 
     return null;
@@ -101,18 +103,22 @@ async function MiddleWare() {
     return null;
   }
   try {
-    const response = await fetch(`${BACKEND_API}/protected`, {
-      credentials: "include",
-    });
+    const response = await fetch(
+      "https://pizzabut-be.rajnishchahar.tech/protected",
+      {
+        credentials: "include",
+      }
+    );
+
     const data = await response.json();
 
     if (!data.isAuthenticated) {
-      throw redirect("/auth?signin");
+      throw new Error("redirect me!");
     }
 
     return data;
   } catch (error) {
-    console.error("Middleware error:", error);
+    console.error("You are not logged in!");
     throw redirect("/auth?signin");
   }
 }

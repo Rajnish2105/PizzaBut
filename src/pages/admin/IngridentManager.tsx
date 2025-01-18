@@ -3,8 +3,6 @@ import IngredientControl from "./IngredientControl";
 import { toast } from "sonner";
 import { ChevronRight } from "lucide-react";
 
-const BACKEND_API = import.meta.env.VITE_BACKEND_API || "http://localhost:3000";
-
 interface Ingredient {
   _id: string;
   name: string;
@@ -47,14 +45,17 @@ const IngredientManager: React.FC<IngredientManagerProps> = ({
         })
       );
 
-      const res = await fetch(`${BACKEND_API}/updateInventory`, {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ updates }),
-      });
+      const res = await fetch(
+        "https://pizzabut-be.rajnishchahar.tech/updateInventory",
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ updates }),
+        }
+      );
 
       if (!res.ok) {
         const { error } = await res.json();

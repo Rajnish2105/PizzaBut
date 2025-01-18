@@ -3,8 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { ChevronRight, Loader2 } from "lucide-react";
 
-const BACKEND_API = import.meta.env.VITE_BACKEND_API || "http://localhost:3000";
-
 interface OrderItem {
   base: {
     name: string;
@@ -63,7 +61,7 @@ const AdminOrders = () => {
 
   const fetchOrders = async () => {
     try {
-      const res = await fetch(`${BACKEND_API}/getEveryOrder`, {
+      const res = await fetch("https://pizzabut-be.rajnishchahar.tech/getEveryOrder", {
         credentials: "include",
         headers: {
           "Content-Type": "application/json",
@@ -94,7 +92,7 @@ const AdminOrders = () => {
 
   const handleStatusUpdate = async (orderId: string, newStatus: string) => {
     try {
-      const res = await fetch(`${BACKEND_API}/updateOrder`, {
+      const res = await fetch("https://pizzabut-be.rajnishchahar.tech/updateOrder", {
         method: "POST",
         credentials: "include",
         headers: {

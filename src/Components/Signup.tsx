@@ -11,8 +11,6 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
-const BACKEND_API = import.meta.env.VITE_BACKEND_API || "http://localhost:3000";
-
 export default function Signup({ isSignup }: { isSignup: boolean }) {
   const navigate = useNavigate();
   const [userInfo, setUserInfo] = useState<{
@@ -49,13 +47,17 @@ export default function Signup({ isSignup }: { isSignup: boolean }) {
 
     try {
       if (isSignup) {
-        const otpres = await fetch(`${BACKEND_API}/createotp`, {
-          method: "POST",
-          headers: {
-            "Content-type": "application/json",
-          },
-          body: JSON.stringify({ email: userInfo.email }),
-        });
+        const otpres = await fetch(
+          "https://pizzabut-be.rajnishchahar.tech/createotp",
+          {
+            method: "POST",
+            credentials: "include",
+            headers: {
+              "Content-type": "application/json",
+            },
+            body: JSON.stringify({ email: userInfo.email }),
+          }
+        );
 
         if (!otpres.ok) {
           const { error } = await otpres.json();
@@ -76,7 +78,7 @@ export default function Signup({ isSignup }: { isSignup: boolean }) {
         });
       }
 
-      const res = await fetch(`${BACKEND_API}/signin`, {
+      const res = await fetch("https://pizzabut-be.rajnishchahar.tech/signin", {
         method: "POST",
         credentials: "include",
         headers: {

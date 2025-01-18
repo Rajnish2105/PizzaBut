@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-const BACKEND_API = import.meta.env.VITE_BACKEND_API || "http://localhost:3000";
-
 interface OrderItem {
   base: {
     name: string;
@@ -37,12 +35,15 @@ const OrderHistory = () => {
   useEffect(() => {
     async function getAllOrders() {
       try {
-        const response = await fetch(`${BACKEND_API}/allorders`, {
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
+        const response = await fetch(
+          "https://pizzabut-be.rajnishchahar.tech/allorders",
+          {
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
         if (!response.ok) {
           const { error } = await response.json();

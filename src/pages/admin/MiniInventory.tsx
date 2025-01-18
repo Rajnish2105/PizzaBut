@@ -3,8 +3,6 @@ import { toast } from "sonner";
 import IngredientManager from "./IngridentManager";
 import type { LoaderFunction } from "react-router-dom";
 
-const BACKEND_API = import.meta.env.VITE_BACKEND_API || "http://localhost:3000";
-
 interface InventoryItem {
   _id: string;
   name: string;
@@ -57,9 +55,12 @@ export default function MiniInventory() {
 
 export const InventoryLoader: LoaderFunction = async () => {
   try {
-    const res = await fetch(`${BACKEND_API}/getStore`, {
+    const res = await fetch("https://pizzabut-be.rajnishchahar.tech/getStore", {
       credentials: "include",
     });
+
+    console.log("getstore", res);
+
     if (!res.ok) {
       const { error } = await res.json();
       throw new Error(error);

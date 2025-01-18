@@ -3,8 +3,6 @@ import { useState, useRef } from "react";
 import { ArrowRight, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
-const BACKEND_API = import.meta.env.VITE_BACKEND_API || "http://localhost:3000";
-
 export default function VerifyOtp() {
   const location = useLocation();
   const navigate = useNavigate(); // Add this
@@ -45,19 +43,22 @@ export default function VerifyOtp() {
     try {
       if (otp.join("") === user.otp) {
         // Fix comparison
-        const res = await fetch(`${BACKEND_API}/signup`, {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name: user.name,
-            email: user.email,
-            password: user.password,
-            role: user.role,
-          }),
-        });
+        const res = await fetch(
+          "https://pizzabut-be.rajnishchahar.tech/signup",
+          {
+            method: "POST",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              name: user.name,
+              email: user.email,
+              password: user.password,
+              role: user.role,
+            }),
+          }
+        );
 
         const data = await res.json();
         if (!res.ok) {

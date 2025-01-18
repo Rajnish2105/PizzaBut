@@ -2,8 +2,6 @@ import { Pizza, PizzaIcon, History, ArrowRight } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link, redirect } from "react-router-dom";
 
-const BACKEND_API = import.meta.env.VITE_BACKEND_API || "http://localhost:3000";
-
 interface FeatureCardProps {
   icon: React.ReactNode;
   title: string;
@@ -34,9 +32,12 @@ const LandingPage: React.FC = () => {
   useEffect(() => {
     async function getUserRole() {
       try {
-        const res = await fetch(`${BACKEND_API}/whoami`, {
-          credentials: "include",
-        });
+        const res = await fetch(
+          "https://pizzabut-be.rajnishchahar.tech/whoami",
+          {
+            credentials: "include",
+          }
+        );
 
         if (!res.ok) {
           const { error } = await res.json();
