@@ -1,7 +1,11 @@
 import "./index.css";
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import {
+  createBrowserRouter,
+  Navigate,
+  RouterProvider,
+} from "react-router-dom";
 import { redirect } from "react-router-dom";
 
 import Layout from "./Layout.tsx";
@@ -19,6 +23,7 @@ import { CustomPizzaLoader } from "./Components/custom order/OrderCustomPizza.ts
 import AdminOrdersPage from "./pages/admin/AdminOrdersPage.tsx"; // Removed adminOrdersLoader import
 import AdminLayout from "./pages/admin/AdminLayout.tsx"; // Added AdminLayout import
 import LandingPage from "./pages/LandingPage.tsx";
+import NotFound from "./pages/NotFound.tsx";
 
 const router = createBrowserRouter([
   {
@@ -34,26 +39,29 @@ const router = createBrowserRouter([
       { path: "/verifyotp", element: <VerifyOtp /> },
       { path: "/forgotpass", element: <ForgotPassword /> },
       {
-        path: "/",
+        path: "user",
         element: <MainLayout />,
         loader: MiddleWare, // Move middleware here to protect all user routes
         children: [
-          { path: "user/dashboard", element: <DashboardPage /> },
+          { path: "", element: <Navigate to="user/dashboard" replace /> },
+          { path: "dashboard", element: <DashboardPage /> },
           {
-            path: "user/custom-order",
+            path: "custom-order",
             loader: CustomPizzaLoader,
             element: <OrderCustomPizza />,
           },
           {
-            path: "user/orderhistory",
+            path: "orderhistory",
             element: <OrderHistory />,
           },
+          { path: "*", element: <NotFound /> },
         ],
       },
       {
         path: "admin",
         element: <AdminLayout />, // Use AdminLayout here
         children: [
+          { path: "", element: <Navigate to="inventory" replace /> },
           {
             path: "inventory",
             loader: InventoryLoader,
@@ -63,8 +71,10 @@ const router = createBrowserRouter([
             path: "handleorders",
             element: <AdminOrdersPage />, // Remove the loader
           },
+          { path: "*", element: <NotFound /> },
         ],
       },
+      { path: "*", element: <NotFound /> },
     ],
   },
 ]);

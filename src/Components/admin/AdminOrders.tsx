@@ -61,12 +61,15 @@ const AdminOrders = () => {
 
   const fetchOrders = async () => {
     try {
-      const res = await fetch("https://pizzabut-be.rajnishchahar.tech/getEveryOrder", {
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const res = await fetch(
+        "https://pizzabut-be.rajnishchahar.tech/getEveryOrder",
+        {
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (!res.ok) {
         const { error, isAdmin } = await res.json();
@@ -92,14 +95,17 @@ const AdminOrders = () => {
 
   const handleStatusUpdate = async (orderId: string, newStatus: string) => {
     try {
-      const res = await fetch("https://pizzabut-be.rajnishchahar.tech/updateOrder", {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ orderId, status: newStatus }),
-      });
+      const res = await fetch(
+        "https://pizzabut-be.rajnishchahar.tech/updateOrder",
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ orderId, status: newStatus }),
+        }
+      );
 
       if (!res.ok) throw new Error("Failed to update order");
 
@@ -115,7 +121,7 @@ const AdminOrders = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gray-900">
+      <div className="flex items-center justify-center min-h-screen h-full bg-gray-900">
         <Loader2 className="w-8 h-8 text-purple-500 animate-spin" />
       </div>
     );
@@ -123,7 +129,7 @@ const AdminOrders = () => {
 
   if (!orders || orders.length === 0) {
     return (
-      <div className="flex items-center justify-center w-full h-screen bg-gray-900">
+      <div className="flex items-center justify-center w-full h-full min-h-screen bg-gray-900">
         <h2 className="text-3xl font-semibold text-gray-400">
           No orders found
         </h2>
@@ -132,7 +138,7 @@ const AdminOrders = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 px-4 py-8">
+    <div className="min-h-screen h-full bg-gray-900 px-4 py-8">
       <div className="max-w-7xl mx-auto">
         <h1 className="text-4xl font-bold mb-8 bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
           All Orders
