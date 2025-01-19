@@ -43,7 +43,7 @@ const router = createBrowserRouter([
         element: <MainLayout />,
         loader: MiddleWare, // Move middleware here to protect all user routes
         children: [
-          { path: "", element: <Navigate to="user/dashboard" replace /> },
+          { path: "", element: <Navigate to="dashboard" replace /> },
           { path: "dashboard", element: <DashboardPage /> },
           {
             path: "custom-order",
