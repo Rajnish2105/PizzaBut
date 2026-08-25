@@ -10,6 +10,7 @@ import {
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { config } from "../utill/config";
 
 export default function Signup({ isSignup }: { isSignup: boolean }) {
   const navigate = useNavigate();
@@ -47,17 +48,14 @@ export default function Signup({ isSignup }: { isSignup: boolean }) {
 
     try {
       if (isSignup) {
-        const otpres = await fetch(
-          "https://pizzabut-be.rajnishchahar.tech/createotp",
-          {
-            method: "POST",
-            credentials: "include",
-            headers: {
-              "Content-type": "application/json",
-            },
-            body: JSON.stringify({ email: userInfo.email }),
-          }
-        );
+        const otpres = await fetch(`${config.API}/createotp`, {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-type": "application/json",
+          },
+          body: JSON.stringify({ email: userInfo.email }),
+        });
 
         if (!otpres.ok) {
           const { error } = await otpres.json();
@@ -78,7 +76,7 @@ export default function Signup({ isSignup }: { isSignup: boolean }) {
         });
       }
 
-      const res = await fetch("https://pizzabut-be.rajnishchahar.tech/signin", {
+      const res = await fetch(`${config.API}/signin`, {
         method: "POST",
         credentials: "include",
         headers: {

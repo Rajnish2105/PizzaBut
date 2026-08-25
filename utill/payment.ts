@@ -14,7 +14,7 @@
 //   onError,
 // }: PaymentHandlerParams) {
 //   try {
-//     const orderResponse = await fetch('https://pizzabut-be.rajnishchahar.tech/create-payment', {
+//     const orderResponse = await fetch('${config.API}/create-payment', {
 //       method: "POST",
 //       credentials: "include",
 //       headers: {
@@ -45,7 +45,7 @@
 //           handler: async function (response: any) {
 //             try {
 //               const verifyResponse = await fetch(
-//                 'https://pizzabut-be.rajnishchahar.tech/verify-payment',
+//                 '${config.API}/verify-payment',
 //                 {
 //                   method: "POST",
 //                   credentials: "include",

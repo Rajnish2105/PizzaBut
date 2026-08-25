@@ -2,8 +2,7 @@ import { useState, useEffect } from "react";
 import PizzaCard from "./PizzaCard";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-
-const RAZORPAY_KEY = import.meta.env.VITE_RAZORPAY_ID;
+import { config } from "../../utill/config";
 
 interface PizzaIngredients {
   base: { _id: string; name: string; price: number };
@@ -122,12 +121,9 @@ const Dashboard = () => {
   useEffect(() => {
     async function get() {
       try {
-        const res = await fetch(
-          "https://pizzabut-be.rajnishchahar.tech/whoami",
-          {
-            credentials: "include",
-          }
-        );
+        const res = await fetch(`${config.API}/whoami`, {
+          credentials: "include",
+        });
         if (!res.ok) {
           const { error } = await res.json();
           throw new Error(error);
@@ -137,8 +133,8 @@ const Dashboard = () => {
           throw new Error("No user");
         }
         setUserInfo({ name: user.name, email: user.email });
-      } catch (err: any) {
-        toast.error(err.message);
+      } catch (err) {
+        toast.error(JSON.stringify(err));
         return;
       }
     }
@@ -168,17 +164,14 @@ const Dashboard = () => {
     if (pizza) {
       try {
         // Step 1: Create payment order
-        const orderResponse = await fetch(
-          "https://pizzabut-be.rajnishchahar.tech/create-payment",
-          {
-            method: "POST",
-            credentials: "include",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ amount: pizza.price }),
-          }
-        );
+        const orderResponse = await fetch(`${config.API}/create-payment`, {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ amount: pizza.price }),
+        });
 
         if (!orderResponse.ok) {
           const { error } = await orderResponse.json();
@@ -188,7 +181,7 @@ const Dashboard = () => {
 
         // Step 2: Initialize Razorpay
         const options = {
-          key: RAZORPAY_KEY, // Your Razorpay key
+          key: config.RZ_ID, // Your Razorpay key
           amount: data.amount,
           currency: data.currency,
           name: "PizzaBut",
@@ -198,7 +191,7 @@ const Dashboard = () => {
             try {
               // Step 3: Verify payment
               const verifyResponse = await fetch(
-                "https://pizzabut-be.rajnishchahar.tech/verify-payment",
+                `${config.API}/verify-payment`,
                 {
                   method: "POST",
                   credentials: "include",
@@ -210,7 +203,7 @@ const Dashboard = () => {
                     razorpay_payment_id: response.razorpay_payment_id,
                     razorpay_signature: response.razorpay_signature,
                   }),
-                }
+                },
               );
 
               if (!verifyResponse.ok) {
@@ -220,22 +213,19 @@ const Dashboard = () => {
               const { data } = await verifyResponse.json();
 
               // Step 4: Create final order
-              const finalOrderResponse = await fetch(
-                "https://pizzabut-be.rajnishchahar.tech/order",
-                {
-                  method: "POST",
-                  credentials: "include",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({
-                    items: pizza.ingredients,
-                    totalPrice: pizza.price,
-                    orderId: data.orderId,
-                    paymentId: data.paymentId,
-                  }),
-                }
-              );
+              const finalOrderResponse = await fetch(`${config.API}/order`, {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  items: pizza.ingredients,
+                  totalPrice: pizza.price,
+                  orderId: data.orderId,
+                  paymentId: data.paymentId,
+                }),
+              });
 
               const finalOrderData = await finalOrderResponse.json();
               if (finalOrderData.error) {

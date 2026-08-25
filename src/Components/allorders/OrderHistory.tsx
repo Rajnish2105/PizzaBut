@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { config } from "../../utill/config";
 
 interface OrderItem {
   base: {
@@ -35,15 +36,12 @@ const OrderHistory = () => {
   useEffect(() => {
     async function getAllOrders() {
       try {
-        const response = await fetch(
-          "https://pizzabut-be.rajnishchahar.tech/allorders",
-          {
-            credentials: "include",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
+        const response = await fetch(`${config.API}/allorders`, {
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
 
         if (!response.ok) {
           const { error } = await response.json();
@@ -101,10 +99,10 @@ const OrderHistory = () => {
                     order.status === "preparing"
                       ? "bg-yellow-900 text-yellow-200"
                       : order.status === "on-the-way"
-                      ? "bg-blue-900 text-blue-200"
-                      : order.status === "delivered"
-                      ? "bg-green-900 text-green-200"
-                      : "bg-gray-700 text-gray-200"
+                        ? "bg-blue-900 text-blue-200"
+                        : order.status === "delivered"
+                          ? "bg-green-900 text-green-200"
+                          : "bg-gray-700 text-gray-200"
                   }`}
                 >
                   {order.status.charAt(0).toUpperCase() + order.status.slice(1)}

@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Boxes, ClipboardList, Menu, X, LogOut } from "lucide-react";
+import { config } from "../../utill/config";
 
 const AdminNav = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleLogout = async () => {
     try {
-      const res = await fetch("https://pizzabut-be.rajnishchahar.tech/logout", {
+      const res = await fetch(`${config.API}/logout`, {
         method: "GET",
         credentials: "include",
       });

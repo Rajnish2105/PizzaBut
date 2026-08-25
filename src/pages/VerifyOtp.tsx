@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useState, useRef } from "react";
 import { ArrowRight, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
+import { config } from "../utill/config";
 
 export default function VerifyOtp() {
   const location = useLocation();
@@ -30,7 +31,7 @@ export default function VerifyOtp() {
 
   const handleKeyDown = (
     index: number,
-    e: React.KeyboardEvent<HTMLInputElement>
+    e: React.KeyboardEvent<HTMLInputElement>,
   ) => {
     if (e.key === "Backspace" && index > 0 && otp[index] === "") {
       inputRefs.current[index - 1]?.focus();
@@ -43,22 +44,19 @@ export default function VerifyOtp() {
     try {
       if (otp.join("") === user.otp) {
         // Fix comparison
-        const res = await fetch(
-          "https://pizzabut-be.rajnishchahar.tech/signup",
-          {
-            method: "POST",
-            credentials: "include",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              name: user.name,
-              email: user.email,
-              password: user.password,
-              role: user.role,
-            }),
-          }
-        );
+        const res = await fetch(`${config.API}/signup`, {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: user.name,
+            email: user.email,
+            password: user.password,
+            role: user.role,
+          }),
+        });
 
         const data = await res.json();
         if (!res.ok) {
@@ -90,7 +88,7 @@ export default function VerifyOtp() {
     } catch (error) {
       console.error("Verification error:", error);
       toast.error(
-        error instanceof Error ? error.message : "Verification failed"
+        error instanceof Error ? error.message : "Verification failed",
       );
     } finally {
       setIsVerifying(false);

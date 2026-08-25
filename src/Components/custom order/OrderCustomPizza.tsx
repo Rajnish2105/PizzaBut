@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { useLoaderData, useNavigate } from "react-router-dom";
 import { handlePayment } from "../../utill/payment";
 import PizzaSection from "./PizzaSection";
+import { config } from "../../utill/config";
 
 interface InventoryItem {
   _id: string;
@@ -42,12 +43,9 @@ const OrderCustomPizza: React.FC = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await fetch(
-          "https://pizzabut-be.rajnishchahar.tech/whoami",
-          {
-            credentials: "include",
-          }
-        );
+        const response = await fetch(`${config.API}/whoami`, {
+          credentials: "include",
+        });
 
         if (!response.ok) {
           const { error } = await response.json();
@@ -59,9 +57,9 @@ const OrderCustomPizza: React.FC = () => {
           name: data.user.name,
           email: data.user.email,
         });
-      } catch (error: any) {
+      } catch (error) {
         console.error("Failed to fetch user data:", error);
-        toast.error(error.message, { closeButton: true });
+        toast.error(JSON.stringify(error), { closeButton: true });
       }
     };
     fetchUserData();
@@ -69,7 +67,7 @@ const OrderCustomPizza: React.FC = () => {
 
   const handleVeggieSelection = (id: string) => {
     setSelectedVeggies((prev) =>
-      prev.includes(id) ? prev.filter((v) => v !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((v) => v !== id) : [...prev, id],
     );
   };
 
@@ -110,29 +108,26 @@ const OrderCustomPizza: React.FC = () => {
             : undefined,
         onSuccess: async (paymentResponse) => {
           try {
-            const response = await fetch(
-              "https://pizzabut-be.rajnishchahar.tech/order",
-              {
-                method: "POST",
-                credentials: "include",
-                headers: {
-                  "Content-Type": "application/json",
+            const response = await fetch(`${config.API}/order`, {
+              method: "POST",
+              credentials: "include",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                items: {
+                  base: bases.find((b) => b._id === selectedBase),
+                  sauce: sauces.find((s) => s._id === selectedSauce),
+                  cheese: cheeses.find((c) => c._id === selectedCheese),
+                  veggies: veggies.filter((v) =>
+                    selectedVeggies.includes(v._id),
+                  ),
                 },
-                body: JSON.stringify({
-                  items: {
-                    base: bases.find((b) => b._id === selectedBase),
-                    sauce: sauces.find((s) => s._id === selectedSauce),
-                    cheese: cheeses.find((c) => c._id === selectedCheese),
-                    veggies: veggies.filter((v) =>
-                      selectedVeggies.includes(v._id)
-                    ),
-                  },
-                  totalPrice: calculateTotalPrice(),
-                  orderId: paymentResponse.razorpay_order_id,
-                  paymentId: paymentResponse.razorpay_payment_id,
-                }),
-              }
-            );
+                totalPrice: calculateTotalPrice(),
+                orderId: paymentResponse.razorpay_order_id,
+                paymentId: paymentResponse.razorpay_payment_id,
+              }),
+            });
 
             if (!response.ok) {
               const { error } = await response.json();
@@ -153,7 +148,7 @@ const OrderCustomPizza: React.FC = () => {
       });
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Failed to place order"
+        error instanceof Error ? error.message : "Failed to place order",
       );
     } finally {
       setIsSubmitting(false);
@@ -215,7 +210,7 @@ const OrderCustomPizza: React.FC = () => {
 // Add loader function
 export async function CustomPizzaLoader() {
   try {
-    const res = await fetch("https://pizzabut-be.rajnishchahar.tech/getStore", {
+    const res = await fetch(`${config.API}/getStore`, {
       credentials: "include",
     });
     if (!res.ok) {

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import IngredientControl from "./IngredientControl";
 import { toast } from "sonner";
 import { ChevronRight } from "lucide-react";
+import { config } from "../../utill/config";
 
 interface Ingredient {
   _id: string;
@@ -42,20 +43,17 @@ const IngredientManager: React.FC<IngredientManagerProps> = ({
         ([_id, quantity]) => ({
           _id,
           quantity,
-        })
+        }),
       );
 
-      const res = await fetch(
-        "https://pizzabut-be.rajnishchahar.tech/updateInventory",
-        {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ updates }),
-        }
-      );
+      const res = await fetch(`${config.API}/updateInventory`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ updates }),
+      });
 
       if (!res.ok) {
         const { error } = await res.json();
@@ -71,7 +69,7 @@ const IngredientManager: React.FC<IngredientManagerProps> = ({
       console.error(error);
       toast.error(
         error instanceof Error ? error.message : "Failed to update inventory",
-        { closeButton: true }
+        { closeButton: true },
       );
     }
   };

@@ -2,13 +2,14 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Pizza, History, Menu, X, LayoutDashboard, LogOut } from "lucide-react";
 import { toast } from "sonner";
+import { config } from "../../utill/config";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleLogout = async () => {
     try {
-      const res = await fetch("https://pizzabut-be.rajnishchahar.tech/logout", {
+      const res = await fetch(`${config.API}/logout`, {
         method: "GET",
         credentials: "include",
       });

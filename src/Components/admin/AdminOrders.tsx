@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { ChevronRight, Loader2 } from "lucide-react";
+import { config } from "../../utill/config";
 
 interface OrderItem {
   base: {
@@ -59,17 +60,14 @@ const AdminOrders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     try {
-      const res = await fetch(
-        "https://pizzabut-be.rajnishchahar.tech/getEveryOrder",
-        {
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const res = await fetch(`${config.API}/getEveryOrder`, {
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
       if (!res.ok) {
         const { error, isAdmin } = await res.json();
@@ -87,25 +85,22 @@ const AdminOrders = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [navigate]);
 
   useEffect(() => {
     fetchOrders();
-  }, []);
+  }, [fetchOrders]);
 
   const handleStatusUpdate = async (orderId: string, newStatus: string) => {
     try {
-      const res = await fetch(
-        "https://pizzabut-be.rajnishchahar.tech/updateOrder",
-        {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ orderId, status: newStatus }),
-        }
-      );
+      const res = await fetch(`${config.API}/updateOrder`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ orderId, status: newStatus }),
+      });
 
       if (!res.ok) throw new Error("Failed to update order");
 
@@ -167,10 +162,10 @@ const AdminOrders = () => {
                     order.status === "preparing"
                       ? "bg-yellow-900 text-yellow-200"
                       : order.status === "on-the-way"
-                      ? "bg-blue-900 text-blue-200"
-                      : order.status === "delivered"
-                      ? "bg-green-900 text-green-200"
-                      : "bg-gray-700 text-gray-200"
+                        ? "bg-blue-900 text-blue-200"
+                        : order.status === "delivered"
+                          ? "bg-green-900 text-green-200"
+                          : "bg-gray-700 text-gray-200"
                   }`}
                 >
                   {order.status.charAt(0).toUpperCase() + order.status.slice(1)}

@@ -24,6 +24,8 @@ import AdminOrdersPage from "./pages/admin/AdminOrdersPage.tsx"; // Removed admi
 import AdminLayout from "./pages/admin/AdminLayout.tsx"; // Added AdminLayout import
 import LandingPage from "./pages/LandingPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import { MiddleWare } from "./utill/adminMiddleware.ts";
+import { config } from "./utill/config.ts";
 
 const router = createBrowserRouter([
   {
@@ -82,18 +84,15 @@ const router = createBrowserRouter([
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <RouterProvider router={router} />
-  </React.StrictMode>
+  </React.StrictMode>,
 );
 
 // Separate loader for auth route
 async function authLoader() {
   try {
-    const response = await fetch(
-      "https://pizzabut-be.rajnishchahar.tech/protected",
-      {
-        credentials: "include",
-      }
-    );
+    const response = await fetch(`${config.API}/protected`, {
+      credentials: "include",
+    });
 
     const data = await response.json();
 
@@ -105,30 +104,5 @@ async function authLoader() {
   } catch (error) {
     console.log("You are logged in!");
     throw redirect("/user/dashboard");
-  }
-}
-
-async function MiddleWare() {
-  if (window.location.pathname === "/auth") {
-    return null;
-  }
-  try {
-    const response = await fetch(
-      "https://pizzabut-be.rajnishchahar.tech/protected",
-      {
-        credentials: "include",
-      }
-    );
-
-    const data = await response.json();
-
-    if (!data.isAuthenticated) {
-      throw new Error("redirect me!");
-    }
-
-    return data;
-  } catch (error) {
-    console.error("You are not logged in!");
-    throw redirect("/auth?signin");
   }
 }

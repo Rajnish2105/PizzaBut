@@ -2,6 +2,7 @@ import { redirect, useLoaderData } from "react-router-dom";
 import { toast } from "sonner";
 import IngredientManager from "./IngridentManager";
 import type { LoaderFunction } from "react-router-dom";
+import { config } from "../../utill/config";
 
 interface InventoryItem {
   _id: string;
@@ -55,7 +56,7 @@ export default function MiniInventory() {
 
 export const InventoryLoader: LoaderFunction = async () => {
   try {
-    const res = await fetch("https://pizzabut-be.rajnishchahar.tech/getStore", {
+    const res = await fetch(`${config.API}/getStore`, {
       credentials: "include",
     });
 

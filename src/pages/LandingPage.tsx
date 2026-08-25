@@ -1,6 +1,7 @@
 import { Pizza, PizzaIcon, History, ArrowRight } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link, redirect } from "react-router-dom";
+import { config } from "../utill/config";
 
 interface FeatureCardProps {
   icon: React.ReactNode;
@@ -32,12 +33,9 @@ const LandingPage: React.FC = () => {
   useEffect(() => {
     async function getUserRole() {
       try {
-        const res = await fetch(
-          "https://pizzabut-be.rajnishchahar.tech/whoami",
-          {
-            credentials: "include",
-          }
-        );
+        const res = await fetch(`${config.API}/whoami`, {
+          credentials: "include",
+        });
 
         if (!res.ok) {
           const { error } = await res.json();

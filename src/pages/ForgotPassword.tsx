@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { Mail } from "lucide-react";
+import { config } from "../utill/config";
 
 export default function ForgotPassword() {
   const [isSubmmitted, setIsSubmitted] = useState<boolean>(false);
@@ -13,17 +14,14 @@ export default function ForgotPassword() {
     // console.log("email before", email);
 
     try {
-      const res = await fetch(
-        "https://pizzabut-be.rajnishchahar.tech/verifyuser",
-        {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-type": "application/json",
-          },
-          body: JSON.stringify({ email }),
-        }
-      );
+      const res = await fetch(`${config.API}/verifyuser`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
       if (!res.ok) {
         const { error } = await res.json();
         throw new Error(error);
@@ -35,9 +33,9 @@ export default function ForgotPassword() {
       } else {
         throw new Error("not verified");
       }
-    } catch (err: any) {
+    } catch (err) {
       console.log(err);
-      toast.error(err.message, { closeButton: true });
+      toast.error(JSON.stringify(err), { closeButton: true });
     }
   }
 

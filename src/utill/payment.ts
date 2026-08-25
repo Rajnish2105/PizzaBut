@@ -1,3 +1,5 @@
+import { config } from "./config";
+
 const RAZORPAY_KEY = import.meta.env.VITE_RAZORPAY_ID;
 
 interface PaymentHandlerOptions {
@@ -28,19 +30,16 @@ export const handlePayment = async ({
 }: PaymentHandlerOptions) => {
   try {
     // Create payment order
-    const response = await fetch(
-      "https://pizzabut-be.rajnishchahar.tech/create-payment",
-      {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          amount: amount, // Send amount in rupees
-        }),
-      }
-    );
+    const response = await fetch(`${config.API}/create-payment`, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        amount: amount, // Send amount in rupees
+      }),
+    });
 
     const { data, error } = await response.json();
     if (error) throw new Error(error);
@@ -56,21 +55,18 @@ export const handlePayment = async ({
       handler: async function (response: any) {
         try {
           // Verify payment
-          const verifyResponse = await fetch(
-            "https://pizzabut-be.rajnishchahar.tech/verify-payment",
-            {
-              method: "POST",
-              credentials: "include",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-              }),
-            }
-          );
+          const verifyResponse = await fetch(`${config.API}/verify-payment`, {
+            method: "POST",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+            }),
+          });
 
           const verification = await verifyResponse.json();
           if (verification.error) throw new Error(verification.error);
